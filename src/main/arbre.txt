@@ -1,0 +1,12 @@
+Albert|34
+Christian|67
+Renee|35
+Olivier|54
+Sonia|25
+Gary|31
+Catherine|78
+Manu|37
+Bernard|20
+Michele|22
+Nadia|52
+Violaine|65
