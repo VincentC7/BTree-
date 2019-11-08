@@ -12,15 +12,11 @@ public class Node<K extends Comparable,V> {
     private ArrayList<Node<K, V>> nodes;
     private Node<K,V> parent;
 
-
-    public Node(Type p_type, Node<K,V> p_parent){
-        keys = new ArrayList<>();
-        nodes = new ArrayList<>();
-        values = new ArrayList<>();
-        type = p_type;
-        parent=p_parent;
-    }
-
+    /**
+     * Constructeur sans parent
+     *
+     * @param p_type Type of node
+     */
     public Node(Type p_type){
         keys = new ArrayList<>();
         nodes = new ArrayList<>();
@@ -29,16 +25,42 @@ public class Node<K extends Comparable,V> {
         parent=null;
     }
 
+    /**
+     * Constructeur avec parent
+     *
+     * @param p_type Type of node
+     * @param p_parent Parent of node
+     */
+    private Node(Type p_type, Node<K, V> p_parent){
+        keys = new ArrayList<>();
+        nodes = new ArrayList<>();
+        values = new ArrayList<>();
+        type = p_type;
+        parent=p_parent;
+    }
+
+    /**
+     * Search the next node who contain the key
+     *
+     * @param key searched key
+     * @return node contain the key
+     */
     public Node<K,V> searchNextNode(K key){
-        int index = 0;
+        int index=0;
         for (K k : keys){
-            if ( k.compareTo(key)<= 0){
+            if (k.compareTo(key)<= 0){
                 index++;
             }
         }
         return nodes.get(index);
     }
 
+    /**
+     * Insert the couple key, val inside this node
+     *
+     * @param key to insert
+     * @param val to insert
+     */
     public void insert(K key,V val){
         addKey(key);
         if (type == Type.leaf || type == Type.starter){
@@ -49,6 +71,9 @@ public class Node<K extends Comparable,V> {
         }
     }
 
+    /**
+     * Algorithme in charge of spliting a node when it is full
+     */
     private void split() {
         //valeur qui remonte
         K upKey = keys.get(BTree.NODE_SIZE / 2 + BTree.NODE_SIZE%2);
@@ -80,10 +105,10 @@ public class Node<K extends Comparable,V> {
                 int mid = keys.size()/2;
                 if (mid > i){
                     newSon.addKey(keys.get(i));
-                    newSon.addValue(values.get(i),i);
+                    if (newSon.type == Type.leaf)newSon.addValue(values.get(i),i);
                 }else{
                     newSon_2.addKey(keys.get(i));
-                    newSon_2.addValue(values.get(i),i-mid);
+                    if (newSon.type == Type.leaf) newSon_2.addValue(values.get(i),i-mid);
                 }
             }
 
@@ -104,7 +129,7 @@ public class Node<K extends Comparable,V> {
                 newNode = new Node<>(Type.leaf,parent);
             }else {
                 newNode = new Node<>(Type.intermediate,parent);
-                List<Node<K,V>> subNods = new ArrayList<>(nodes.subList(nodes.size()/2,nodes.size()));
+                List<Node<K,V>> subNods = new ArrayList<>(nodes.subList(nodes.size()/2 + BTree.NODE_SIZE%2,nodes.size()));
                 for (Node<K,V> n : subNods){
                     newNode.addNode(n);
                     nodes.remove(n);
@@ -116,11 +141,13 @@ public class Node<K extends Comparable,V> {
             List<V> subValues = new ArrayList<>(values.subList(values.size()/2,values.size()));
             for (int i=0; i<subKeys.size();i++){
                 K key = subKeys.get(i);
-                V val = subValues.get(i);
                 newNode.addKey(key);
-                newNode.addValue(val,i);
                 keys.remove(key);
-                values.remove(val);
+                if (newNode.type == Type.leaf){
+                    V val = subValues.get(i);
+                    newNode.addValue(val,i);
+                    values.remove(val);
+                }
             }
 
             parent.nodes.add(parent.nodes.indexOf(this)+1,newNode);
