@@ -1,6 +1,7 @@
 package main;
 
 import arbre.BTree;
+import arbre.Node;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -76,7 +77,14 @@ public class Main {
                         }
                         break;
                     case "3":
-                        System.out.println("Delete");
+                        System.out.println("Entrez la clé que vous souhaitez supprimer");
+                        String keyDel = sc.next();
+                        BTree currentTree;
+                        if (keyDel.matches("-?\\d+")){ //case key=age
+                            treeAgeName.delete(Integer.parseInt(keyDel));
+                        }else{ //case key=name
+                            treeNameAge.delete(keyDel);
+                        }
                         break;
                     case "4":
                         return;
@@ -84,12 +92,12 @@ public class Main {
                         System.out.println("Error : vous n'avez pas respecté les consignes");
                         break;
                 }
+                System.out.println();
             }
 
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 
     private static void displayStatus(BTree tree1, BTree tree2,String name, String age){

@@ -34,6 +34,10 @@ public class BTree<K extends Comparable,V> {
     }
 
     //Delete
+    public void delete(K key){
+        Node<K,V> n = findNode(key,root);
+
+    }
 
     // ==========================================      ToString     ================================================= //
 
@@ -42,10 +46,10 @@ public class BTree<K extends Comparable,V> {
         return buildStringTree(getRoot(),"\t");
     }
 
-    public String buildStringTree(Node n, String lvl){
+    public String buildStringTree(Node<K,V> n, String lvl){
         StringBuilder res = new StringBuilder(n.toString()+"\n");
-        ArrayList<Node> sons = n.getNodes();
-        for (Node son : sons){
+        ArrayList<Node<K,V>> sons = n.getNodes();
+        for (Node<K,V> son : sons){
             String sonDisplay = buildStringTree(son, lvl+"\t");
             res.append(lvl).append(sonDisplay);
         }

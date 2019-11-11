@@ -161,6 +161,11 @@ public class Node<K extends Comparable,V> {
         return values.get(keys.indexOf(key));
     }
 
+
+    public void delete(K key){
+    }
+
+
     public void addKey(K key){
         keys.add(key);
         Collections.sort(keys);
@@ -176,6 +181,12 @@ public class Node<K extends Comparable,V> {
 
     public Double getFillRate(){
         return (double) (BTree.NODE_SIZE / (keys.size()));
+    }
+
+    public boolean hasGoodFillRate(){
+        if (type==Type.leaf){
+        }
+        return true;
     }
 
     // ==========================================      ToString     ================================================= //
@@ -202,13 +213,8 @@ public class Node<K extends Comparable,V> {
 
     // ========================================== Getters & Setters ================================================= //
 
-
     public Type getType() {
         return type;
-    }
-
-    public int indexOfKey(K key){
-        return keys.indexOf(key);
     }
 
     public void setType(Type type) {
@@ -226,4 +232,5 @@ public class Node<K extends Comparable,V> {
     public void setParent(Node<K, V> parent) {
         this.parent = parent;
     }
+
 }
