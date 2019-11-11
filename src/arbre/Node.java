@@ -156,6 +156,11 @@ public class Node<K extends Comparable,V> {
         }
     }
 
+    public V findValue(K key){
+        if (!keys.contains(key)) return null;
+        return values.get(keys.indexOf(key));
+    }
+
     public void addKey(K key){
         keys.add(key);
         Collections.sort(keys);

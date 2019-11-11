@@ -27,9 +27,13 @@ public class BTree<K extends Comparable,V> {
         n.insert(key,val);
     }
 
-    //Delete
+    //Find
+    public V findValue(K key){
+        Node<K,V> n = findNode(key,root);
+        return n.findValue(key);
+    }
 
-    //Replace
+    //Delete
 
     // ==========================================      ToString     ================================================= //
 

@@ -12,39 +12,93 @@ public class Main {
     public static void main(String[] args) {
         try {
             Scanner sc = new Scanner(System.in);
-            //System.out.println("Taille des blocs : ");
-            BTree<String , Integer> tree = new BTree<>(3);
+            System.out.println("Taille des blocs : ");
+            String size = sc.nextLine();
+            while(!size.matches("-?\\d+")){
+                System.out.println("Erreur : donnez une valeur entiere svp");
+                size = sc.nextLine();
+            }
+            int sizeINT = Integer.parseInt(size);
+            BTree<Integer, String> treeAgeName = new BTree<>(sizeINT);
+            BTree<String, Integer> treeNameAge = new BTree<>(sizeINT);
 
             BufferedReader br = new BufferedReader(new FileReader("src/main/arbre.txt"));
+
             String line;
             while (((line = br.readLine()) != null)){
                 String[] splitedLine = line.split("[|]",2);
-                String key = splitedLine[0];
-                Integer value = Integer.parseInt(splitedLine[1]);
-                tree.insert(key,value);
-                System.out.println("Insertion : clé="+key+" valeur"+value);
-                System.out.println(tree);
-                System.out.println("===============================================================================================================");
+                String name = splitedLine[0];
+                Integer age = Integer.parseInt(splitedLine[1]);
+
+                //Insert
+                treeNameAge.insert(name,age);
+                treeAgeName.insert(age,name);
+
+                displayStatus(treeAgeName,treeNameAge,name,age+"");
             }
             br.close();
 
-            /*
+
             while (true){
-                System.out.println("Insertion : Veuillez indiquer une valeur entiere (Pour quitter tapez q)");
-                String val = sc.nextLine();
-                while (!val.matches("-?\\d+")){
-                    if (val.equals("q") || val.equals("Q")) return;
-                    System.out.println("Erreur : Veuillez indiquer une valeur entiere (Pour quitter tapez q)");
-                    val = sc.nextLine();
+                System.out.println("Insertion (1) ; Recherche (2) ; Suppression (3) ; Quitter (4)");
+                String choice = sc.next();
+                switch (choice){
+                    case "1":
+                        System.out.println("Comment s'appel la personne que vous souhaitez inserer dans la base de données ?");
+                        String name = sc.next();
+                        System.out.println("Quel age a cette personne ?");
+                        String age = sc.next();
+                        while (!age.matches("-?\\d+")){
+                            System.out.println("Erreur : Veuillez indiquer une valeur entiere");
+                            age = sc.next();
+                        }
+                        //Insert
+                        treeNameAge.insert(name,Integer.parseInt(age));
+                        treeAgeName.insert(Integer.parseInt(age),name);
+
+                        //Display consol
+                        displayStatus(treeAgeName,treeNameAge,name,age);
+                        break;
+                    case "2":
+                        System.out.println("Entrez la clé que vous recherchez");
+                        String key = sc.next();
+                        String value;
+                        if (key.matches("-?\\d+")){ //case key=age
+                            value = treeAgeName.findValue(Integer.parseInt(key));
+                        }else{ //case key=name
+                            value = treeNameAge.findValue(key)+"";
+                        }
+
+                        if (value == null || value.equals("null")){
+                            System.out.println("Il n'y a aucune valeur associée à la clé que vous avez insérée ");
+                        }else{
+                            System.out.println(value);
+                        }
+                        break;
+                    case "3":
+                        System.out.println("Delete");
+                        break;
+                    case "4":
+                        return;
+                    default:
+                        System.out.println("Error : vous n'avez pas respecté les consignes");
+                        break;
                 }
-                System.out.println(tree);
-                System.out.println("========================================================================================================================\n");
             }
-            */
+
         } catch (IOException e) {
             e.printStackTrace();
         }
 
     }
 
+    private static void displayStatus(BTree tree1, BTree tree2,String name, String age){
+        System.out.println("Insertion : name="+name+" age="+age);
+        System.out.println("##########Key: age, Val: name########");
+        System.out.println(tree1+"\n");
+        System.out.println("##########Key: name, Val: age########");
+        System.out.println(tree2);
+        System.out.println("===============================================================================================================");
+
+    }
 }
