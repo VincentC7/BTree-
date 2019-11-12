@@ -11,6 +11,7 @@ public class Node<K extends Comparable,V> {
     private ArrayList<V> values;
     private ArrayList<Node<K, V>> nodes;
     private Node<K,V> parent;
+    private Node<K,V> next;
 
     /**
      * Constructeur sans parent
@@ -23,6 +24,7 @@ public class Node<K extends Comparable,V> {
         values = new ArrayList<>();
         type = p_type;
         parent=null;
+        next=null;
     }
 
     /**
@@ -37,6 +39,7 @@ public class Node<K extends Comparable,V> {
         values = new ArrayList<>();
         type = p_type;
         parent=p_parent;
+        next=null;
     }
 
     /**
@@ -99,6 +102,7 @@ public class Node<K extends Comparable,V> {
             }else{
                 newSon = new Node<>(Type.leaf,this);
                 newSon_2 = new Node<>(Type.leaf,this);
+                newSon.setNext(newSon_2);
             }
 
             for (int i=0;i<keys.size();i++){
@@ -120,13 +124,15 @@ public class Node<K extends Comparable,V> {
             nodes.add(newSon);
             nodes.add(newSon_2);
 
-            //On fait remonter la clé
             if (newSon_2.getType() == Type.intermediate) newSon_2.keys.remove(upKey);
+            //On fait remonter la clé
             addKey(upKey);
         }else {
             Node<K,V> newNode;
             if (type == Type.leaf){
                 newNode = new Node<>(Type.leaf,parent);
+                newNode.setNext(next);
+                next=newNode;
             }else {
                 newNode = new Node<>(Type.intermediate,parent);
                 List<Node<K,V>> subNods = new ArrayList<>(nodes.subList(nodes.size()/2 + BTree.NODE_SIZE%2,nodes.size()));
@@ -163,6 +169,7 @@ public class Node<K extends Comparable,V> {
 
 
     public void delete(K key){
+
     }
 
 
@@ -231,6 +238,14 @@ public class Node<K extends Comparable,V> {
 
     public void setParent(Node<K, V> parent) {
         this.parent = parent;
+    }
+
+    public void setNext(Node<K,V> n){
+        next=n;
+    }
+
+    public Node<K,V> getNext(){
+        return next;
     }
 
 }
