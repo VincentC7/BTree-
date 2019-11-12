@@ -39,13 +39,12 @@ public class Main {
             }
             br.close();
 
-
             while (true){
                 System.out.println("Insertion (1) ; Recherche (2) ; Suppression (3) ; Quitter (4)");
                 String choice = sc.next();
                 switch (choice){
                     case "1":
-                        System.out.println("Comment s'appel la personne que vous souhaitez inserer dans la base de données ?");
+                        System.out.println("Comment s'appelle la personne que vous souhaitez inserer dans la base de données ?");
                         String name = sc.next();
                         System.out.println("Quel age a cette personne ?");
                         String age = sc.next();
