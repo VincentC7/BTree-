@@ -1,6 +1,5 @@
 package arbre;
 
-import javax.crypto.spec.PSource;
 import java.util.ArrayList;
 
 public class BTree<K extends Comparable,V> {
@@ -40,6 +39,17 @@ public class BTree<K extends Comparable,V> {
         return n.delete(key);
     }
 
+    public void displayAllLeaves(){
+        Node<K,V> n=root;
+        while (n.getType() != Type.leaf){
+            n=n.getNodes().get(0);
+        }
+        while (n != null){
+            System.out.println(n);
+            n=n.getNext();
+        }
+    }
+
     // ==========================================      ToString     ================================================= //
 
     @Override
@@ -61,9 +71,5 @@ public class BTree<K extends Comparable,V> {
 
     public Node<K, V> getRoot() {
         return root;
-    }
-
-    public void setRoot(Node<K, V> root) {
-        this.root = root;
     }
 }
