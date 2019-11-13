@@ -35,7 +35,7 @@ public class Main {
                 treeNameAge.insert(name,age);
                 treeAgeName.insert(age,name);
 
-                displayStatus(treeAgeName,treeNameAge,name,age+"");
+                displayStatus(treeAgeName,treeNameAge,name,age+"","Insert");
             }
             br.close();
 
@@ -58,7 +58,7 @@ public class Main {
                         treeAgeName.insert(Integer.parseInt(age),name);
 
                         //Display consol
-                        displayStatus(treeAgeName,treeNameAge,name,age);
+                        displayStatus(treeAgeName,treeNameAge,name,age,"Insert");
                         break;
                     case "2":
                         System.out.println("Entrez la clé que vous recherchez");
@@ -79,12 +79,23 @@ public class Main {
                     case "3":
                         System.out.println("Entrez la clé que vous souhaitez supprimer");
                         String keyDel = sc.next();
-                        BTree currentTree;
+                        Object val;
                         if (keyDel.matches("-?\\d+")){ //case key=age
-                            treeAgeName.delete(Integer.parseInt(keyDel));
+                            val = treeAgeName.delete(Integer.parseInt(keyDel));
+                            if (val==null){
+                                System.out.println("Valeur introuvable");
+                                break;
+                            }
+                            treeNameAge.delete(val.toString());
                         }else{ //case key=name
-                            treeNameAge.delete(keyDel);
+                            val = treeNameAge.delete(keyDel);
+                            if (val==null){
+                                System.out.println("Valeur introuvable");
+                                break;
+                            }
+                            treeAgeName.delete(Integer.parseInt(val.toString()));
                         }
+                        displayStatus(treeAgeName,treeNameAge,keyDel,val.toString(),"Delete");
                         break;
                     case "4":
                         return;
@@ -100,8 +111,8 @@ public class Main {
         }
     }
 
-    private static void displayStatus(BTree tree1, BTree tree2,String name, String age){
-        System.out.println("Insertion : name="+name+" age="+age);
+    private static void displayStatus(BTree tree1, BTree tree2,String name, String age,String action){
+        System.out.println(action+" : name="+name+" age="+age);
         System.out.println("##########Key: age, Val: name########");
         System.out.println(tree1+"\n");
         System.out.println("##########Key: name, Val: age########");

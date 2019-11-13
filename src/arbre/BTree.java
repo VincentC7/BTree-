@@ -1,5 +1,6 @@
 package arbre;
 
+import javax.crypto.spec.PSource;
 import java.util.ArrayList;
 
 public class BTree<K extends Comparable,V> {
@@ -34,9 +35,9 @@ public class BTree<K extends Comparable,V> {
     }
 
     //Delete
-    public void delete(K key){
+    public V delete(K key){
         Node<K,V> n = findNode(key,root);
-
+        return n.delete(key);
     }
 
     // ==========================================      ToString     ================================================= //

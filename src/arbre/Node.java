@@ -168,8 +168,12 @@ public class Node<K extends Comparable,V> {
     }
 
 
-    public void delete(K key){
-
+    public V delete(K key){
+        if (!keys.contains(key)) return null;
+        V val = values.get(keys.indexOf(key));
+        values.remove(val);
+        keys.remove(key);
+        return val;
     }
 
 
