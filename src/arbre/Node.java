@@ -1,5 +1,7 @@
 package arbre;
 
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -173,7 +175,32 @@ public class Node<K extends Comparable,V> {
         V val = values.get(keys.indexOf(key));
         values.remove(val);
         keys.remove(key);
+        if (!hasGoodFillRate(0)){
+            redistribute();
+        }
         return val;
+    }
+
+    private void redistribute(){
+        int index = parent.nodes.indexOf(this);
+        if (index != 0 && parent.nodes.get(index-1).hasGoodFillRate(1)){ //Check left
+            System.err.println("Je peux prendre a gauche");
+            Node<K,V> left = parent.nodes.get(index-1);
+            K key = left.keys.get(left.values.size()-1);
+            V val = left.values.get(left.values.size()-1);
+            insert(key,val);
+            left.keys.remove(key);
+            left.values.remove(val);
+            parent.keys.set(index-1,key);
+        }else if (next!=null && next.hasGoodFillRate(1)){ //Check right
+            System.err.println("Je peux prendre a droite");
+        }else {
+            fusion();
+        }
+    }
+
+    private void fusion(){
+        System.err.println("FUSION");
     }
 
 
@@ -194,10 +221,15 @@ public class Node<K extends Comparable,V> {
         return (double) (BTree.NODE_SIZE / (keys.size()));
     }
 
-    public boolean hasGoodFillRate(){
+    public boolean hasGoodFillRate(int delta){
+        DecimalFormat df = new DecimalFormat("#");
         if (type==Type.leaf){
+            df.setRoundingMode(RoundingMode.UP);
+            return (keys.size()-delta>=Integer.parseInt(df.format((BTree.NODE_SIZE+1)/2)));
+        }else {
+            df.setRoundingMode(RoundingMode.DOWN);
+            return (keys.size()-delta>=Integer.parseInt(df.format((BTree.NODE_SIZE+1)/2)));
         }
-        return true;
     }
 
     // ==========================================      ToString     ================================================= //
