@@ -14,6 +14,7 @@ public class Node<K extends Comparable,V> {
     private ArrayList<Node<K, V>> nodes;
     private Node<K,V> parent;
     private Node<K,V> next;
+    private Node<K,V> prev;
 
     /**
      * Constructeur sans parent
@@ -25,8 +26,6 @@ public class Node<K extends Comparable,V> {
         nodes = new ArrayList<>();
         values = new ArrayList<>();
         type = p_type;
-        parent=null;
-        next=null;
     }
 
     /**
@@ -41,7 +40,6 @@ public class Node<K extends Comparable,V> {
         values = new ArrayList<>();
         type = p_type;
         parent=p_parent;
-        next=null;
     }
 
     /**
@@ -105,6 +103,7 @@ public class Node<K extends Comparable,V> {
                 newSon = new Node<>(Type.leaf,this);
                 newSon_2 = new Node<>(Type.leaf,this);
                 newSon.setNext(newSon_2);
+                newSon_2.setPrev(newSon);
             }
 
             for (int i=0;i<keys.size();i++){
@@ -134,6 +133,8 @@ public class Node<K extends Comparable,V> {
             if (type == Type.leaf){
                 newNode = new Node<>(Type.leaf,parent);
                 newNode.setNext(next);
+                if (next!=null) next.setPrev(newNode);
+                newNode.setPrev(this);
                 next=newNode;
             }else {
                 newNode = new Node<>(Type.intermediate,parent);
@@ -164,64 +165,167 @@ public class Node<K extends Comparable,V> {
         }
     }
 
+    /**
+     *
+     * @param key
+     * @return
+     */
     public V findValue(K key){
         if (!keys.contains(key)) return null;
         return values.get(keys.indexOf(key));
     }
 
-
+    /**
+     *
+     * @param key
+     * @return
+     */
     public V delete(K key){
         if (!keys.contains(key)) return null;
         V val = values.get(keys.indexOf(key));
         values.remove(val);
         keys.remove(key);
         if (!hasGoodFillRate(0)){
-            redistribute();
+            redistributeLeaves();
         }
         return val;
     }
 
-    private void redistribute(){
-        int index = parent.nodes.indexOf(this);
-        if (index != 0 && parent.nodes.get(index-1).hasGoodFillRate(1)){ //Check left
-            System.err.println("Je peux prendre a gauche");
-            Node<K,V> left = parent.nodes.get(index-1);
-            K key = left.keys.get(left.values.size()-1);
-            V val = left.values.get(left.values.size()-1);
+    /**
+     *
+     */
+    private void redistributeLeaves(){
+        if (prev!=null && prev.hasGoodFillRate(1)){ //Check left
+            K key = prev.keys.get(prev.values.size()-1);
+            V val = prev.values.get(prev.values.size()-1);
+            prev.values.remove(val);
+            prev.keys.remove(key);
+
             insert(key,val);
-            left.keys.remove(key);
-            left.values.remove(val);
-            parent.keys.set(index-1,key);
+            if (prev.parent == parent) {
+                parent.keys.set(parent.nodes.indexOf(this)-1, keys.get(0));
+            }else if (prev.parent.parent != null && parent.parent != null) {
+                checkUpperNode(prev,0,key);
+            }
         }else if (next!=null && next.hasGoodFillRate(1)){ //Check right
-            System.err.println("Je peux prendre a droite");
+            K key = next.keys.get(0);
+            V val = next.values.get(0);
+            prev.values.remove(val);
+            next.keys.remove(key);
+
+            insert(key,val);
+            K upKey = next.keys.get(0);
+            if (next.parent == parent) {
+                parent.keys.set(parent.nodes.indexOf(this), next.keys.get(0));
+            }else if (next.parent.parent != null && parent.parent != null) {
+                checkUpperNode(next,1,upKey);
+            }
         }else {
             fusion();
         }
     }
 
+    /**
+     * Methode qui regarde l'intégrité des clés dans les niveaux intermédiaires/racines
+     */
+    private void checkUpperNode(Node<K, V> brother, int delta, K upKey) {
+        Node<K, V> parentNext = brother.parent.parent;
+        Node<K, V> parentThis = parent.parent;
+        //Find common node relative to two nodes
+        while (parentNext != parentThis) {
+            parentNext = parentNext.parent;
+            parentThis = parentThis.parent;
+        }
+        int compt = 0;
+        for (K k : parentNext.keys) {
+            if (upKey.compareTo(k) <= 0) {
+                break;
+            }
+            compt++;
+        }
+        parentNext.keys.set(Math.max(compt - delta,0), upKey);
+    }
+
+    /**
+     *
+     */
     private void fusion(){
-        System.err.println("FUSION");
+        if (type==Type.leaf){
+            Node<K,V> mergeNode = prev;
+            if (prev==null){
+                mergeNode=next;
+                next.prev=null;
+            }else{
+                prev.next=next;
+                if (next!=null){
+                    next.prev=prev;
+                    if (prev.parent != parent)checkUpperNode(prev,1,next.keys.get(0));
+                }
+            }
+            for(int i=0;i<keys.size();i++){
+                mergeNode.addKey(keys.get(i));
+                mergeNode.addValue(values.get(i));
+            }
+            parent.keys.remove(Math.max(parent.nodes.indexOf(this)-1,0));
+            parent.nodes.remove(this);
+
+            if (!parent.hasGoodFillRate(0))parent.redistributeInte();
+
+        }
+    }
+
+    private void redistributeInte(){
+        if (type!=Type.root){
+            int index = parent.nodes.indexOf(this);
+            if (index!=0 && (parent.nodes.get(index-1).hasGoodFillRate(1))){
+
+            }else if (index!=parent.nodes.size()-1 && (parent.nodes.get(index+1).hasGoodFillRate(1))){
+
+            }
+        }
     }
 
 
-    public void addKey(K key){
+    /**
+     *
+     * @param key
+     */
+    private void addKey(K key){
         keys.add(key);
         Collections.sort(keys);
     }
 
-    public void addNode(Node<K, V> node){
+    /**
+     *
+     * @param node
+     */
+    private void addNode(Node<K, V> node){
         nodes.add(node);
     }
 
+    /**
+     *
+     * @param val
+     * @param index
+     */
     public void addValue(V val, int index){
         values.add(index,val);
     }
+
+    /**
+     *
+     * @param value
+     */
+    private void addValue(V value){
+        values.add(value);
+    }
+
 
     public Double getFillRate(){
         return (double) (BTree.NODE_SIZE / (keys.size()));
     }
 
-    public boolean hasGoodFillRate(int delta){
+    private boolean hasGoodFillRate(int delta){
         DecimalFormat df = new DecimalFormat("#");
         if (type==Type.leaf){
             df.setRoundingMode(RoundingMode.UP);
@@ -284,4 +388,11 @@ public class Node<K extends Comparable,V> {
         return next;
     }
 
+    public void setPrev(Node<K, V> prev) {
+        this.prev = prev;
+    }
+
+    public Node<K, V> getPrev() {
+        return prev;
+    }
 }

@@ -39,14 +39,24 @@ public class BTree<K extends Comparable,V> {
         return n.delete(key);
     }
 
-    public void displayAllLeaves(){
+    public void displayAllLeaves(boolean leftToRight){
         Node<K,V> n=root;
-        while (n.getType() != Type.leaf){
-            n=n.getNodes().get(0);
-        }
-        while (n != null){
-            System.out.println(n);
-            n=n.getNext();
+        if (leftToRight){
+            while (n.getType() != Type.leaf){
+                n=n.getNodes().get(0);
+            }
+            while (n != null){
+                System.out.println(n);
+                n=n.getNext();
+            }
+        }else{
+            while (n.getType() != Type.leaf){
+                n=n.getNodes().get(n.getNodes().size()-1);
+            }
+            while (n != null){
+                System.out.println(n);
+                n=n.getPrev();
+            }
         }
     }
 

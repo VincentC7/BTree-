@@ -34,30 +34,30 @@ public class Main {
                 //Insert
                 treeNameAge.insert(name,age);
                 treeAgeName.insert(age,name);
-
-                displayStatus(treeAgeName,treeNameAge,name,age+"","Insert");
+                System.out.println(treeAgeName);
+                System.out.println(treeNameAge);
             }
             br.close();
 
             while (true){
-                System.out.println("Insertion (1) ; Recherche (2) ; Suppression (3) ; Quitter (4)");
+                System.out.println("Insertion (1) ; Recherche (2) ; Suppression (3) ; Affichier arbre age->nom (4) ; Affichier arbre nom->age (5) ; Quitter (6)");
                 String choice = sc.next();
                 switch (choice){
                     case "1":
-                        System.out.println("Comment s'appelle la personne que vous souhaitez inserer dans la base de données ?");
-                        String name = sc.next();
-                        System.out.println("Quel age a cette personne ?");
-                        String age = sc.next();
-                        while (!age.matches("-?\\d+")){
-                            System.out.println("Erreur : Veuillez indiquer une valeur entiere");
-                            age = sc.next();
-                        }
+                        System.out.println("Insert : donnez une clé");
+                        String keyInsert = sc.next();
+                        System.out.println("Insert : donnez une valeur");
+                        String valInsert = sc.next();
                         //Insert
-                        treeNameAge.insert(name,Integer.parseInt(age));
-                        treeAgeName.insert(Integer.parseInt(age),name);
-
+                        System.out.println("Insert : key="+keyInsert+" val="+valInsert);
+                        if (keyInsert.matches("-?\\d+")) { //case key=age
+                            treeAgeName.insert(Integer.parseInt(keyInsert),valInsert);
+                            System.out.println(treeAgeName);
+                        }else{ //case key=name
+                            treeNameAge.insert(keyInsert,Integer.parseInt(valInsert));
+                            System.out.println(treeNameAge);
+                        }
                         //Display consol
-                        displayStatus(treeAgeName,treeNameAge,name,age,"Insert");
                         break;
                     case "2":
                         System.out.println("Entrez la clé que vous recherchez");
@@ -85,18 +85,23 @@ public class Main {
                                 System.out.println("Valeur introuvable");
                                 break;
                             }
-                            treeNameAge.delete(val.toString());
+                            System.out.println(treeAgeName);
                         }else{ //case key=name
                             val = treeNameAge.delete(keyDel);
                             if (val==null){
                                 System.out.println("Valeur introuvable");
                                 break;
                             }
-                            treeAgeName.delete(Integer.parseInt(val.toString()));
+                            System.out.println(treeNameAge);
                         }
-                        displayStatus(treeAgeName,treeNameAge,keyDel,val.toString(),"Delete");
                         break;
                     case "4":
+                        System.out.println(treeAgeName);
+                        break;
+                    case "5":
+                        System.out.println(treeNameAge);
+                        break;
+                    case "6":
                         return;
                     default:
                         System.out.println("Error : vous n'avez pas respecté les consignes");
@@ -110,13 +115,5 @@ public class Main {
         }
     }
 
-    private static void displayStatus(BTree tree1, BTree tree2,String name, String age,String action){
-        System.out.println(action+" : name="+name+" age="+age);
-        System.out.println("##########Key: age, Val: name########");
-        System.out.println(tree1+"\n");
-        System.out.println("##########Key: name, Val: age########");
-        System.out.println(tree2);
-        System.out.println("===============================================================================================================");
 
-    }
 }
