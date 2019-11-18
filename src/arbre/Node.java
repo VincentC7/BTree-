@@ -203,7 +203,7 @@ public class Node<K extends Comparable,V> {
 
             insert(key,val);
             if (prev.parent == parent) {
-                parent.keys.set(parent.nodes.indexOf(this)-1, keys.get(0));
+                parent.keys.set(Math.max(parent.nodes.indexOf(this)-1,0), keys.get(0));
             }else if (prev.parent.parent != null && parent.parent != null) {
                 checkUpperNode(prev,0,key);
             }
@@ -216,7 +216,7 @@ public class Node<K extends Comparable,V> {
             insert(key,val);
             K upKey = next.keys.get(0);
             if (next.parent == parent) {
-                parent.keys.set(Math.max(parent.nodes.indexOf(this)-1,0), next.keys.get(0));
+                parent.keys.set(Math.max(parent.nodes.indexOf(next)-1,0), next.keys.get(0));
             }else if (next.parent.parent != null && parent.parent != null) {
                 checkUpperNode(next,1,upKey);
             }
@@ -266,14 +266,11 @@ public class Node<K extends Comparable,V> {
                 mergeNode.keys.addAll(keys);
                 mergeNode.values.addAll(values);
             }
-            removePrentKey();
-        }
-    }
 
-    private void removePrentKey() {
-        parent.keys.remove(Math.max(parent.nodes.indexOf(this)-1,0));
-        parent.nodes.remove(this);
-        if (!parent.hasGoodFillRate(0))parent.redistributeInte();
+            parent.keys.remove(Math.max(parent.nodes.indexOf(this)-1,0));
+            parent.nodes.remove(this);
+            if (!parent.hasGoodFillRate(0))parent.redistributeInte();
+        }
     }
 
     private void redistributeInte(){
@@ -285,18 +282,18 @@ public class Node<K extends Comparable,V> {
                 prev.nodes.remove(redistributedNode);
                 prev.keys.remove(prev.keys.get(prev.keys.size()-1));
                 nodes.add(0,redistributedNode);
-
-                keys.add(0,getFirstKey());
+                redistributedNode.parent = this;
+                keys.add(0,redistributedNode.next.keys.get(0));
                 parent.keys.set(Math.max(index-1,0),getFirstKey());
             }else if (index!=parent.nodes.size()-1 && (parent.nodes.get(index+1).hasGoodFillRate(1))){
                 Node<K,V> next = parent.nodes.get(index+1);
                 Node<K,V> redistributedNode = next.nodes.get(0);
                 next.nodes.remove(redistributedNode);
                 next.keys.remove(next.keys.get(0));
+                redistributedNode.parent = this;
+                keys.add(redistributedNode.keys.get(0));
+                parent.keys.set(index,next.getFirstKey());
                 nodes.add(redistributedNode);
-
-                keys.add(getFirstKey());
-                parent.keys.set(index,getFirstKey());
             }else {
                 mergeInte();
             }
@@ -305,7 +302,7 @@ public class Node<K extends Comparable,V> {
 
     private K getFirstKey(){
         //Recupère la clé la plus basse
-        Node<K,V> nextSon = nodes.get(0);
+        Node<K,V> nextSon = this;
         while (nextSon.type!=Type.leaf){
             nextSon=nextSon.nodes.get(0);
         }
@@ -320,20 +317,22 @@ public class Node<K extends Comparable,V> {
                 mergeNode=parent.nodes.get(index+1);
                 for(int i=0;i<nodes.size();i++){
                     mergeNode.nodes.add(i,nodes.get(i));
-                    nodes.get(i).setParent(this);
+                    nodes.get(i).setParent(mergeNode);
                 }
             }else{
                 mergeNode=parent.nodes.get(index-1);
                 for(Node<K,V>n:nodes){
                     mergeNode.nodes.add(n);
-                    n.setParent(this);
+                    n.setParent(mergeNode);
                 }
             }
             mergeNode.keys.clear();
             for (int i=1;i<mergeNode.nodes.size();i++){
                 mergeNode.keys.add(mergeNode.nodes.get(i).keys.get(0));
             }
-            removePrentKey();
+            parent.keys.remove(Math.max(parent.nodes.indexOf(this)-1,0));
+            parent.nodes.remove(this);
+            if (!parent.hasGoodFillRate(0))parent.redistributeInte();
         }
     }
 
@@ -395,6 +394,7 @@ public class Node<K extends Comparable,V> {
         bloc.append("]");
         return bloc.toString();
     }
+
 
     // ========================================== Getters & Setters ================================================= //
 
