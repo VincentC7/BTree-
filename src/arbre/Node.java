@@ -221,7 +221,7 @@ public class Node<K extends Comparable,V> {
                 checkUpperNode(next,1,upKey);
             }
         }else {
-            fusion();
+            merge();
         }
     }
 
@@ -249,7 +249,7 @@ public class Node<K extends Comparable,V> {
     /**
      *
      */
-    private void fusion(){
+    private void merge(){
         if (type==Type.leaf){
             Node<K,V> mergeNode = prev;
             if (prev==null){
@@ -266,12 +266,14 @@ public class Node<K extends Comparable,V> {
                 mergeNode.keys.addAll(keys);
                 mergeNode.values.addAll(values);
             }
-            parent.keys.remove(Math.max(parent.nodes.indexOf(this)-1,0));
-            parent.nodes.remove(this);
-
-            if (!parent.hasGoodFillRate(0))parent.redistributeInte();
-
+            removePrentKey();
         }
+    }
+
+    private void removePrentKey() {
+        parent.keys.remove(Math.max(parent.nodes.indexOf(this)-1,0));
+        parent.nodes.remove(this);
+        if (!parent.hasGoodFillRate(0))parent.redistributeInte();
     }
 
     private void redistributeInte(){
@@ -282,38 +284,35 @@ public class Node<K extends Comparable,V> {
                 Node<K,V> redistributedNode = prev.nodes.get(prev.nodes.size()-1);
                 prev.nodes.remove(redistributedNode);
                 prev.keys.remove(prev.keys.get(prev.keys.size()-1));
-                keys.add(0,nodes.get(0).keys.get(0));
                 nodes.add(0,redistributedNode);
 
-                //Recupère la clé la plus basse
-                Node<K,V> nextSon = nodes.get(0);
-                while (nextSon.type!=Type.leaf){
-                    nextSon=nextSon.nodes.get(0);
-                }
-                K upKey = nextSon.keys.get(0);
-                parent.keys.set(Math.max(index-1,0),upKey);
+                keys.add(0,getFirstKey());
+                parent.keys.set(Math.max(index-1,0),getFirstKey());
             }else if (index!=parent.nodes.size()-1 && (parent.nodes.get(index+1).hasGoodFillRate(1))){
                 Node<K,V> next = parent.nodes.get(index+1);
                 Node<K,V> redistributedNode = next.nodes.get(0);
                 next.nodes.remove(redistributedNode);
                 next.keys.remove(next.keys.get(0));
-                keys.add(redistributedNode.keys.get(0));
                 nodes.add(redistributedNode);
 
-                //Recupère la clé la plus basse
-                Node<K,V> nextSon = next.nodes.get(0);
-                while (nextSon.type!=Type.leaf){
-                    nextSon=nextSon.nodes.get(0);
-                }
-                K upKey = nextSon.keys.get(0);
-                parent.keys.set(index,upKey);
+                keys.add(getFirstKey());
+                parent.keys.set(index,getFirstKey());
             }else {
-                fusionInte();
+                mergeInte();
             }
         }
     }
 
-    private void fusionInte(){
+    private K getFirstKey(){
+        //Recupère la clé la plus basse
+        Node<K,V> nextSon = nodes.get(0);
+        while (nextSon.type!=Type.leaf){
+            nextSon=nextSon.nodes.get(0);
+        }
+        return nextSon.keys.get(0);
+    }
+
+    private void mergeInte(){
         if (type!=Type.root){
             int index = parent.nodes.indexOf(this);
             Node<K,V>mergeNode;
@@ -334,13 +333,9 @@ public class Node<K extends Comparable,V> {
             for (int i=1;i<mergeNode.nodes.size();i++){
                 mergeNode.keys.add(mergeNode.nodes.get(i).keys.get(0));
             }
-            parent.keys.remove(Math.max(parent.nodes.indexOf(this)-1,0));
-            parent.nodes.remove(this);
-
-            if (!parent.hasGoodFillRate(0))parent.redistributeInte();
+            removePrentKey();
         }
     }
-
 
     /**
      *
@@ -368,19 +363,6 @@ public class Node<K extends Comparable,V> {
         values.add(index,val);
     }
 
-    /**
-     *
-     * @param value
-     */
-    private void addValue(V value){
-        values.add(value);
-    }
-
-
-    public Double getFillRate(){
-        return (double) (BTree.NODE_SIZE / (keys.size()));
-    }
-
     private boolean hasGoodFillRate(int delta){
         DecimalFormat df = new DecimalFormat("#");
         if (type==Type.leaf){
@@ -388,7 +370,7 @@ public class Node<K extends Comparable,V> {
             return (keys.size()-delta>=Integer.parseInt(df.format((BTree.NODE_SIZE+1)/2)));
         }else {
             df.setRoundingMode(RoundingMode.DOWN);
-            return (keys.size()-delta>=Integer.parseInt(df.format((BTree.NODE_SIZE+1)/2)));
+            return (keys.size()-delta>=Integer.parseInt(df.format((BTree.NODE_SIZE)/2)));
         }
     }
 

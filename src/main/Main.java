@@ -23,7 +23,7 @@ public class Main {
             BTree<Integer, String> treeAgeName = new BTree<>(sizeINT);
             BTree<String, Integer> treeNameAge = new BTree<>(sizeINT);
 
-            BufferedReader br = new BufferedReader(new FileReader("src/main/arbre.txt"));
+            BufferedReader br = new BufferedReader(new FileReader("src/main/all.txt"));
 
             String line;
             while (((line = br.readLine()) != null)){
